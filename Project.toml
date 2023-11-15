@@ -1,0 +1,9 @@
+name = "DisjunctiveToQUBO"
+uuid = "3876ba37-d6da-4106-be5a-cc36d4722c9d"
+authors = ["pedromxavier <pedromxavier@poli.ufrj.br>"]
+version = "0.1.0"
+
+[deps]
+DisjunctiveProgramming = "0d27d021-0159-4c7d-b4a7-9ccb5d9366cf"
+MathOptInterface = "b8f27783-ece8-5eb3-8dc8-9495eed66fee"
+ToQUBO = "9a412ddf-83fa-43b6-9748-7843c851aa65"
