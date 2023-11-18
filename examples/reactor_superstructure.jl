@@ -1,5 +1,4 @@
 using DisjunctiveProgramming # master branch required 
-using BARON
 
 # Set parameters
 cx = [1.5, 1]
@@ -8,7 +7,7 @@ cy = [6.1, 5.9]
 d = 3 # not specified in the problem, I think it is 3
 
 # Create the model
-model = GDPModel(BARON.Optimizer) # TODO replace with ToQUBO
+model = GDPModel() # TODO add appropriate optimizer for ToQUBO
 
 # Add the variables
 @variable(model, 0 <= x[1:2] <= 5)
