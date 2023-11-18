@@ -1,0 +1,6 @@
+[deps]
+DisjunctiveProgramming = "0d27d021-0159-4c7d-b4a7-9ccb5d9366cf"
+DisjunctiveToQUBO = "3876ba37-d6da-4106-be5a-cc36d4722c9d"
+JuMP = "4076af6c-e467-56ae-b986-b466b2749572"
+Plots = "91a5bcdd-55d7-5caf-9e0b-520d859cae80"
+ToQUBO = "9a412ddf-83fa-43b6-9748-7843c851aa65"
