@@ -15,7 +15,7 @@ model = GDPModel(BARON.Optimizer) # TODO replace with ToQUBO
 @variable(model, y[1:2], Logical)
 
 # Add the objective
-@objective(model, Min, cx' * x + cy' * binary_variable.(y))
+@objective(model, Min, cx' * x.^2 + cy' * binary_variable.(y))
 
 # Create the disjunction constraint
 @constraint(model, [i = 1:2], x[i] <= 5, Disjunct(y[i]))
