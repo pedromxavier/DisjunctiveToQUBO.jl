@@ -123,8 +123,8 @@ version = "1.15.1"
 
 [[deps.DisjunctiveProgramming]]
 deps = ["JuMP", "Reexport"]
-git-tree-sha1 = "efc75f6c83f71e7ac233fbe7abcc3fdb277fa2d2"
-repo-rev = "moi_reform"
+git-tree-sha1 = "f1a629385aacf5c4cce9ae0c6796f00e055e7817"
+repo-rev = "master"
 repo-url = "https://github.com/pulsipher/DisjunctiveProgramming.jl"
 uuid = "0d27d021-0159-4c7d-b4a7-9ccb5d9366cf"
 version = "0.4.1"
@@ -621,7 +621,9 @@ uuid = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 
 [[deps.ToQUBO]]
 deps = ["MathOptInterface", "PseudoBooleanOptimization", "QUBOTools", "Random", "TOML"]
-git-tree-sha1 = "00260a3cca6965132719e833476f2f8d38c7bd1a"
+git-tree-sha1 = "8c99511f51b1ee128d572842afeb31de9da82135"
+repo-rev = "px/indicator"
+repo-url = "https://github.com/psrenergy/ToQUBO.jl.git"
 uuid = "9a412ddf-83fa-43b6-9748-7843c851aa65"
 version = "0.1.7"
 
