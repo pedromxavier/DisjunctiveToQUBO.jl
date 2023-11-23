@@ -1,4 +1,6 @@
 [deps]
+DWave = "4d534982-bf11-4157-9e48-fe3a62208a50"
+DataFrames = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0"
 DisjunctiveProgramming = "0d27d021-0159-4c7d-b4a7-9ccb5d9366cf"
 DisjunctiveToQUBO = "3876ba37-d6da-4106-be5a-cc36d4722c9d"
 JuMP = "4076af6c-e467-56ae-b986-b466b2749572"
