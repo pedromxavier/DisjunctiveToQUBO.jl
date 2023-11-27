@@ -6,4 +6,5 @@ version = "0.1.0"
 [deps]
 DisjunctiveProgramming = "0d27d021-0159-4c7d-b4a7-9ccb5d9366cf"
 MathOptInterface = "b8f27783-ece8-5eb3-8dc8-9495eed66fee"
+PySA = "46b73cfa-376a-48ee-8926-0c45ac3f7830"
 ToQUBO = "9a412ddf-83fa-43b6-9748-7843c851aa65"

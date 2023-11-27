@@ -1,6 +1,30 @@
+using JuMP
+using ToQUBO
 using QUBOTools
 using QUBODrivers
 using LinearAlgebra
+using Plots
+
+export NumberOfReads, reads, compilation_summary, sampling_summary, squares
+
+# Make plots look professional
+Plots.default(;
+    fontfamily = "Computer Modern",
+    plot_titlefontsize  = 16,
+    titlefontsize       = 14,
+    guidefontsize       = 12,
+    legendfontsize      = 10,
+    tickfontsize        = 10,
+)
+
+const NumberOfReads = QUBOTools.__moi_num_reads()
+
+function reads(model::JuMP.Model; result::Integer = 1)
+    vm = unsafe_backend(model)::ToQUBO.Optimizer
+    qo = vm.optimizer::QUBODrivers.AbstractSampler
+
+    return QUBOTools.reads(qo, result)
+end
 
 function compilation_summary(model)
     # Retrieve Virtual Model
@@ -44,7 +68,7 @@ function compilation_summary(model)
 
     t = MOI.get(vm, ToQUBO.Attributes.CompilationTime())
     
-    print(
+    println(
         """
         ⋄ Compilation Summary
 
@@ -92,7 +116,7 @@ function sampling_summary(model, λ)
         NaN
     end
 
-    print(
+    println(
         """
         ⋄ Sampling Summary
 
@@ -103,4 +127,51 @@ function sampling_summary(model, λ)
         ⋄ Time-to-target (sec): $(ts)
         """
     )
+end
+
+
+function plot_optimal_solution!(plt, x⃰)
+    scatter!(
+        plt,
+        [x⃰[1]],
+        [x⃰[2]];
+        color=:white,
+        marker=:star8,
+        markersize=8,
+        label="Optimal Solution",
+    )
+
+    return plt
+end
+
+function plot_best_sample!(plt, x::Vector{Vector{T}}) where {T}
+    scatter!(
+        plt,
+        [x[end][1]],
+        [x[end][2]];
+        color=:white,
+        marker=:circle,
+        label="Best Sample",
+        markersize=8,
+    )
+
+    return plt
+end
+
+function plot_solutions!(plt, x::Vector{Vector{T}}, z::Vector{T}, r::Vector{Int}, x⃰::Vector{T}; nr::Integer=length(x), color=:balance) where {T}
+    scatter!(
+        plt,
+        [x[i][1] for i = 1:nr],
+        [x[i][2] for i = 1:nr];
+        zcolor         = z,
+        color          = color,
+        marker         = :circle,
+        markersize     = 4r,
+        legend_columns = 2,
+        label          = "Samples",
+    )
+
+    plot_best_sample!(plt, x)
+
+    return plot_optimal_solution!(plt, x⃰)
 end
