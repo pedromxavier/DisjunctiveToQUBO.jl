@@ -1,8 +1,9 @@
-include("paper.jl")
-
+using Revise
 using JuMP
 using Plots
 using DisjunctiveProgramming
+
+includet("paper.jl")
 
 # Set parameters
 cx = [1.5, 1]
@@ -54,12 +55,12 @@ end
 function plot_reactor_feasible(; ns::Integer=1_000, color=:bluesreds)
     plt = plot_reactor()
 
+    plot!(plt; plot_title="Feasible Region")
+
     return plot_reactor_feasible!(plt; ns, color)
 end
 
 function plot_reactor_feasible!(plt; ns::Integer=1_000, color=:bluesreds)
-    plot!(plt; plot_title="Feasible Region")
-
     x1 = filter(x -> α[1] * x ≥ d, range(0, 5; length=ns))
     x2 = filter(x -> α[2] * x ≥ d, range(0, 5; length=ns))
     xs = range(-1, 6; length=ns)
@@ -91,8 +92,6 @@ function plot_reactor_feasible!(plt; ns::Integer=1_000, color=:bluesreds)
         color     = :gray,
         linestyle = :dash,
     )
-
-    
 
     return plt
 end
@@ -143,7 +142,7 @@ function plot_reactor_bigm!(plt, x::Vector{Vector{T}}, z::Vector{T}, r::Vector{I
     return plot_solutions!(plt, x, z, r, x⃰; nr)
 end
 
-function plot_reactor_bigm_relaxation!(plt, M::Number = 3.75; ns::Integer=1_000)
+function plot_reactor_bigm_relaxation!(plt, M::Number = 5.0; ns::Integer=1_000)
     x1 = x2 = range(0, 5; length=ns)
 
     envelope(x1, x2) = (0 <= x1 <= M) &&
@@ -157,6 +156,7 @@ function plot_reactor_bigm_relaxation!(plt, M::Number = 3.75; ns::Integer=1_000)
         plt, x1, x2, shading;
         color=:red,
         alpha=0.2,
+        label=raw"Bigm relax",
         colorbar_entry=false,
     )
 
@@ -170,78 +170,34 @@ function plot_reactor_hull(nr::Integer)
         title=raw"$ \min~z = c_{x}'\mathbf{x} + c_{y}'\mathbf{y} $",
         xlabel=raw"$x_1$",
         ylabel=raw"$x_2$",
-        xlims=(0, 5),
-        ylims=(0, 5),
-        clims=(0, 6),
+        xlims=(-1, 6),
+        ylims=(-1, 6),
+        # clims=( 0, 6),
         aspect_ratio=:equal,
+        legend = :outertop,
         legend_columns=2,
         colorbar_title=raw"$z$",
     )
 end
 
-function plot_reactor_hull!(plt, x⃰, x; ns::Integer=1_000)
-    x1 = x2 = range(-3, 3; length=ns)
+function plot_reactor_hull!(plt, x⃰, x; ns::Integer=1_000, color=:bluesreds)
+    x1 = x2 = range(0, 5; length=ns)
 
-    # y1 = 1
-    objective1(x1, x2) = x1 - x2 + 1
-    feasible1(x1, x2) = -2 ≤ x1 ≤ -1 && -2 ≤ x2 ≤ -1
-    coloring1(x1, x2) = ifelse(feasible1(x1, x2), objective1(x1, x2), NaN)
-
-    # y2 = 1
-    objective2(x1, x2) = x1 - x2 + 5
-    feasible2(x1, x2) = 1 ≤ x1 ≤ 2 && 1 ≤ x2 ≤ 2
-    coloring2(x1, x2) = ifelse(feasible2(x1, x2), objective2(x1, x2), NaN)
-
-    envelope(x1, x2) = (-1 ≤ x1 - x2 ≤ 1) && (-2 ≤ x1 ≤ 2) && (-2 ≤ x2 ≤ 2)
-    shading(x1, x2) = ifelse(envelope(x1, x2), 1.0, NaN)
+    envelope(x1, x2) = (0 ≤ x2 + x1 ≤ 5) && (0 ≤ x1 ≤ 5) && (0 ≤ x2 ≤ 5) 
+    shading(x1, x2)  = ifelse(envelope(x1, x2), 1.0, NaN)
 
     heatmap!(
         plt, x1, x2, shading;
-        color=:red,
-        alpha=0.2,
-        xlims=extrema(x1),
-        ylims=extrema(x2),
-        colorbar_entry=false,
+        color = :red,
+        alpha = 0.2,
+        colorbar_entry = false,
+        z_order = :back,
     )
 
-    heatmap!(
-        plt, x1, x2, coloring1;
-        xlims=extrema(x1),
-        ylims=extrema(x2),
-        z_order=:back,
-    )
-
-    heatmap!(
-        plt, x1, x2, coloring2;
-        xlims=extrema(x1),
-        ylims=extrema(x2),
-        z_order=:back,
-    )
-
-    scatter!(
-        plt,
-        [x[1]],
-        [x[2]];
-        color=:white,
-        marker=:circle,
-        markersize=8,
-        label="Best Sample",
-    )
-
-    scatter!(
-        plt,
-        [x⃰[1]],
-        [x⃰[2]];
-        color=:white,
-        marker=:star8,
-        markersize=8,
-        label="Optimal Solution",
-    )
-
-    plt
+    return plot_reactor_feasible!(plt; ns, color)
 end
 
-function plot_reactor_hull(model::JuMP.Model, x⃰; nr::Integer=result_count(model), ns::Integer=1_000)
+function plot_reactor_hull(model::JuMP.Model, x⃰; nr::Integer=result_count(model), ns::Integer=1_000, color=:bluesreds)
     plt = plot_reactor_hull(nr)
 
     x1 = reverse!([value(model[:x][1]; result=i) for i = 1:nr])
@@ -254,6 +210,7 @@ function plot_reactor_hull(model::JuMP.Model, x⃰; nr::Integer=result_count(mod
         plt,
         x1,
         x2;
+        color,
         zcolor=z,
         marker=:circle,
         markersize=4r,
@@ -261,72 +218,59 @@ function plot_reactor_hull(model::JuMP.Model, x⃰; nr::Integer=result_count(mod
         z_order=:front,
     )
 
-    plot_reactor_hull!(plt, x⃰, x; ns)
+    plot_reactor_hull!(plt, x⃰, x; ns, color)
 
-    plt
+    scatter!(
+        plt,
+        [x1[1]],
+        [x[2]];
+        color=:white,
+        marker=:diamond,
+        markersize=8,
+        label="Best Sample",
+    )
+
+    scatter!(
+        plt,
+        [x⃰[1]],
+        [x⃰[2]];
+        color=:white,
+        marker=:star8,
+        markersize=8,
+        label="Optimal Solution",
+    )
+
+    return plt
 end
 
 function plot_reactor_indicator(nr::Integer)
     return plot(;
         size=(700, 600),
         plot_title="Indicator Feasible Region, samples = $(nr)",
-        title=raw"$ \min~z = x_{1} - x_{2} + y_{1} + 5y_{2} $",
+        title=raw"$ \min~z = c_{x}'\mathbf{x} + c_{y}'\mathbf{y} $",
         xlabel=raw"$x_1$",
         ylabel=raw"$x_2$",
-        xlims=(-3, 3),
-        ylims=(-3, 3),
-        clims=(0, 6),
+        xlims=(-1, 6),
+        ylims=(-1, 6),
+        # clims=(0, 6),
         aspect_ratio=:equal,
+        legend = :outertop,
         legend_columns=2,
         colorbar_title=raw"$z$",
     )
 end
 
 function plot_reactor_indicator!(plt, x⃰, x; ns::Integer=1_000)
-    x1 = x2 = range(-3, 3; length=ns)
+    # x1 = x2 = range(-3, 3; length=ns)
 
-    # y1 = 1
-    objective1(x1, x2) = x1 - x2 + 1
-    feasible1(x1, x2) = -2 ≤ x1 ≤ -1 && -2 ≤ x2 ≤ -1
-    coloring1(x1, x2) = ifelse(feasible1(x1, x2), objective1(x1, x2), NaN)
-
-    # y2 = 1
-    objective2(x1, x2) = x1 - x2 + 5
-    feasible2(x1, x2) = 1 ≤ x1 ≤ 2 && 1 ≤ x2 ≤ 2
-    coloring2(x1, x2) = ifelse(feasible2(x1, x2), objective2(x1, x2), NaN)
-
-    envelope(x1, x2) = (-1 ≤ x1 - x2 ≤ 1) && (-2 ≤ x1 ≤ 2) && (-2 ≤ x2 ≤ 2)
-    shading(x1, x2) = ifelse(envelope(x1, x2), 1.0, NaN)
-
-    # heatmap!(
-    #     plt, x1, x2, shading;
-    #     color = :red,
-    #     alpha = 0.2,
-    #     xlims = extrema(x1),
-    #     ylims = extrema(x2),
-    #     colorbar_entry = false,
-    # )
-
-    heatmap!(
-        plt, x1, x2, coloring1;
-        xlims=extrema(x1),
-        ylims=extrema(x2),
-        z_order=:back,
-    )
-
-    heatmap!(
-        plt, x1, x2, coloring2;
-        xlims=extrema(x1),
-        ylims=extrema(x2),
-        z_order=:back,
-    )
+    plot_reactor_feasible!(plt; ns)
 
     scatter!(
         plt,
         [x[1]],
         [x[2]];
         color=:white,
-        marker=:circle,
+        marker=:diamond,
         markersize=8,
         label="Best Sample",
     )
@@ -344,7 +288,7 @@ function plot_reactor_indicator!(plt, x⃰, x; ns::Integer=1_000)
     plt
 end
 
-function plot_reactor_indicator(model::JuMP.Model, x⃰; nr::Integer=result_count(model), ns::Integer=1_000)
+function plot_reactor_indicator(model::JuMP.Model, x⃰; nr::Integer=result_count(model), ns::Integer=1_000, color=:bluesreds)
     plt = plot_reactor_indicator(nr)
 
     x1 = reverse!([value(model[:x][1]; result=i) for i = 1:nr])
@@ -357,6 +301,7 @@ function plot_reactor_indicator(model::JuMP.Model, x⃰; nr::Integer=result_coun
         plt,
         x1,
         x2;
+        color,
         zcolor=z,
         marker=:circle,
         markersize=4r,

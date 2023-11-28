@@ -150,7 +150,7 @@ function plot_best_sample!(plt, x::Vector{Vector{T}}) where {T}
         [x[end][1]],
         [x[end][2]];
         color=:white,
-        marker=:circle,
+        marker=:diamond,
         label="Best Sample",
         markersize=8,
     )
