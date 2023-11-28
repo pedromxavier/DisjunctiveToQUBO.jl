@@ -8,8 +8,8 @@ includet("paper.jl")
 # Set parameters
 cx = [1.5, 1]
 cy = [6.1, 5.9]
-α = [0.75, 0.8]
-d = 3 # not specified in the problem, I think it is 3
+α  = [0.75, 0.8]
+d  = 3 # not specified in the problem, I think it is 3
 
 function solve_gdp_reactors(config!::Function, optimizer=HiGHS.Optimizer; method=Indicator())
     model = GDPModel(optimizer)
@@ -23,8 +23,8 @@ function solve_gdp_reactors(config!::Function, optimizer=HiGHS.Optimizer; method
 
     @constraint(model, α'x ≥ d)
 
-    @constraint(model, x[1] ≤ 0, Disjunct(Y[1]))
-    @constraint(model, x[2] ≤ 0, Disjunct(Y[2]))
+    @constraint(model, x[2] ≤ 0, Disjunct(Y[1]))
+    @constraint(model, x[1] ≤ 0, Disjunct(Y[2]))
 
     disjunction(model, Y, exactly1=true)
 
@@ -39,7 +39,7 @@ solve_gdp_reactors(optimizer=HiGHS.Optimizer; method=Indicator()) = solve_gdp_re
 
 function plot_reactor()
     return plot(;
-        size=(700, 600),
+        size=(1000, 900),
         title=raw"$ \min~z = \mathbf{c_{x}}'\mathbf{x} + \mathbf{c_{y}}'\mathbf{y} $",
         xlabel=raw"$x_1$",
         ylabel=raw"$x_2$",
@@ -156,7 +156,6 @@ function plot_reactor_bigm_relaxation!(plt, M::Number = 5.0; ns::Integer=1_000)
         plt, x1, x2, shading;
         color=:red,
         alpha=0.2,
-        label=raw"Bigm relax",
         colorbar_entry=false,
     )
 
@@ -165,9 +164,9 @@ end
 
 function plot_reactor_hull(nr::Integer)
     return plot(;
-        size=(700, 600),
+        size=(1000, 900),
         plot_title="Hull Feasible Region, samples = $(nr)",
-        title=raw"$ \min~z = c_{x}'\mathbf{x} + c_{y}'\mathbf{y} $",
+        title=raw"$ \min~z = \mathbf{c_{x}}'\mathbf{x} + \mathbf{c_{y}}'\mathbf{y} $",
         xlabel=raw"$x_1$",
         ylabel=raw"$x_2$",
         xlims=(-1, 6),
@@ -204,6 +203,8 @@ function plot_reactor_hull(model::JuMP.Model, x⃰; nr::Integer=result_count(mod
     x2 = reverse!([value(model[:x][2]; result=i) for i = 1:nr])
     z = reverse!([objective_value(model; result=i) for i = 1:nr])
     r = reverse!([reads(model; result=i) for i = 1:nr])
+    R = maximum(r)
+    s = r ./ R
     x = [x1[end], x2[end]]
 
     scatter!(
@@ -213,7 +214,7 @@ function plot_reactor_hull(model::JuMP.Model, x⃰; nr::Integer=result_count(mod
         color,
         zcolor=z,
         marker=:circle,
-        markersize=4r,
+        markersize=20s,
         label="Samples",
         z_order=:front,
     )
@@ -224,9 +225,9 @@ function plot_reactor_hull(model::JuMP.Model, x⃰; nr::Integer=result_count(mod
         plt,
         [x1[1]],
         [x[2]];
-        color=:white,
-        marker=:diamond,
-        markersize=8,
+        color=:violet,
+        marker=:rect,
+        markersize=20 * s[end],
         label="Best Sample",
     )
 
@@ -236,7 +237,7 @@ function plot_reactor_hull(model::JuMP.Model, x⃰; nr::Integer=result_count(mod
         [x⃰[2]];
         color=:white,
         marker=:star8,
-        markersize=8,
+        markersize=10,
         label="Optimal Solution",
     )
 
@@ -245,9 +246,9 @@ end
 
 function plot_reactor_indicator(nr::Integer)
     return plot(;
-        size=(700, 600),
+        size=(1000, 900),
         plot_title="Indicator Feasible Region, samples = $(nr)",
-        title=raw"$ \min~z = c_{x}'\mathbf{x} + c_{y}'\mathbf{y} $",
+        title=raw"$ \min~z = \mathbf{c_{x}}'\mathbf{x} + \mathbf{c_{y}}'\mathbf{y} $",
         xlabel=raw"$x_1$",
         ylabel=raw"$x_2$",
         xlims=(-1, 6),
@@ -260,34 +261,6 @@ function plot_reactor_indicator(nr::Integer)
     )
 end
 
-function plot_reactor_indicator!(plt, x⃰, x; ns::Integer=1_000)
-    # x1 = x2 = range(-3, 3; length=ns)
-
-    plot_reactor_feasible!(plt; ns)
-
-    scatter!(
-        plt,
-        [x[1]],
-        [x[2]];
-        color=:white,
-        marker=:diamond,
-        markersize=8,
-        label="Best Sample",
-    )
-
-    scatter!(
-        plt,
-        [x⃰[1]],
-        [x⃰[2]];
-        color=:white,
-        marker=:star8,
-        markersize=8,
-        label="Optimal Solution",
-    )
-
-    plt
-end
-
 function plot_reactor_indicator(model::JuMP.Model, x⃰; nr::Integer=result_count(model), ns::Integer=1_000, color=:bluesreds)
     plt = plot_reactor_indicator(nr)
 
@@ -295,7 +268,11 @@ function plot_reactor_indicator(model::JuMP.Model, x⃰; nr::Integer=result_coun
     x2 = reverse!([value(model[:x][2]; result=i) for i = 1:nr])
     z = reverse!([objective_value(model; result=i) for i = 1:nr])
     r = reverse!([reads(model; result=i) for i = 1:nr])
+    R = maximum(r)
+    s = r ./ R
     x = [x1[end], x2[end]]
+
+    plot_reactor_feasible!(plt; ns)
 
     scatter!(
         plt,
@@ -304,12 +281,34 @@ function plot_reactor_indicator(model::JuMP.Model, x⃰; nr::Integer=result_coun
         color,
         zcolor=z,
         marker=:circle,
-        markersize=4r,
+        markersize=20s,
         label="Samples",
+        z_order=:front,
+        markerstrokewidth = 0,
+    )
+
+    scatter!(
+        plt,
+        [x1[end]],
+        [x2[end]];
+        color=:violet,
+        marker=:rect,
+        markersize=20 * s[end],
+        label="Best Sample",
         z_order=:front,
     )
 
-    plot_reactor_indicator!(plt, x⃰, x; ns)
+    scatter!(
+        plt,
+        [x⃰[1]],
+        [x⃰[2]];
+        color=:white,
+        marker=:star8,
+        markersize=10,
+        label="Optimal Solution",
+        z_order=:front,
+        markerstrokewidth = 1,
+    )
 
     plt
 end

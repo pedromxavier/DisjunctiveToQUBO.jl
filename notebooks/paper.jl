@@ -137,22 +137,22 @@ function plot_optimal_solution!(plt, x⃰)
         [x⃰[2]];
         color=:white,
         marker=:star8,
-        markersize=8,
+        markersize=10,
         label="Optimal Solution",
     )
 
     return plt
 end
 
-function plot_best_sample!(plt, x::Vector{Vector{T}}) where {T}
+function plot_best_sample!(plt, x::Vector{Vector{T}}, r::Vector{Int}) where {T}
     scatter!(
         plt,
         [x[end][1]],
         [x[end][2]];
-        color=:white,
-        marker=:diamond,
+        color=:violet,
+        marker=:rect,
         label="Best Sample",
-        markersize=8,
+        markersize= 10,
     )
 
     return plt
@@ -166,12 +166,12 @@ function plot_solutions!(plt, x::Vector{Vector{T}}, z::Vector{T}, r::Vector{Int}
         zcolor         = z,
         color          = color,
         marker         = :circle,
-        markersize     = 4r,
+        markersize     = 2r,
         legend_columns = 2,
         label          = "Samples",
     )
 
-    plot_best_sample!(plt, x)
+    plot_best_sample!(plt, x, r)
 
     return plot_optimal_solution!(plt, x⃰)
 end
