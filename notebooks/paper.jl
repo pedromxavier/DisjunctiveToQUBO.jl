@@ -129,30 +129,29 @@ function sampling_summary(model, λ)
     )
 end
 
-
-function plot_optimal_solution!(plt, x⃰)
+function plot_optimal_solution!(plt, x⃰; s = 1.0)
     scatter!(
         plt,
         [x⃰[1]],
         [x⃰[2]];
-        color=:white,
-        marker=:star8,
-        markersize=10,
+        color      = :white,
+        marker     = :star8,
+        markersize = 10,
         label="Optimal Solution",
     )
 
     return plt
 end
 
-function plot_best_sample!(plt, x::Vector{Vector{T}}, r::Vector{Int}) where {T}
+function plot_best_sample!(plt, x::Vector{Vector{T}}) where {T}
     scatter!(
         plt,
         [x[end][1]],
         [x[end][2]];
-        color=:violet,
-        marker=:rect,
-        label="Best Sample",
-        markersize= 10,
+        color      = :violet,
+        marker     = :rect,
+        label      = "Best Sample",
+        markersize = 10,
     )
 
     return plt
@@ -171,7 +170,7 @@ function plot_solutions!(plt, x::Vector{Vector{T}}, z::Vector{T}, r::Vector{Int}
         label          = "Samples",
     )
 
-    plot_best_sample!(plt, x, r)
+    plot_best_sample!(plt, x)
 
     return plot_optimal_solution!(plt, x⃰)
 end

@@ -1,6 +1,7 @@
 using Revise
 using JuMP
 using Plots
+using LinearAlgebra
 using DisjunctiveProgramming
 
 includet("paper.jl")
@@ -19,7 +20,7 @@ function solve_gdp_reactors(config!::Function, optimizer=HiGHS.Optimizer; method
 
     y = binary_variable.(Y)
 
-    @objective(model, Min, cx'x + cy'y)
+    @objective(model, Min, cx' * x .^ 2 + cy'y)
 
     @constraint(model, α'x ≥ d)
 
@@ -39,16 +40,16 @@ solve_gdp_reactors(optimizer=HiGHS.Optimizer; method=Indicator()) = solve_gdp_re
 
 function plot_reactor()
     return plot(;
-        size=(1000, 900),
-        title=raw"$ \min~z = \mathbf{c_{x}}'\mathbf{x} + \mathbf{c_{y}}'\mathbf{y} $",
-        xlabel=raw"$x_1$",
-        ylabel=raw"$x_2$",
-        colorbar_title=raw"$z$",
-        xlims=(-1, 6),
-        ylims=(-1, 6),
-        # clims          = ( 0, 6),
-        legend = :outertop,
-        aspect_ratio=:equal,
+        size           = (1000, 900),
+        title          = raw"$ \min~z = \mathbf{c_{x}}'\mathbf{x} + \mathbf{c_{y}}'\mathbf{y} $",
+        xlabel         = raw"$x_1$",
+        ylabel         = raw"$x_2$",
+        colorbar_title = raw"$z$",
+        xlims          = ( -1,  6),
+        ylims          = ( -1,  6),
+        clims          = ( 20, 45),
+        legend         = :outertop,
+        aspect_ratio   = :equal,
     )
 end
 
@@ -65,23 +66,28 @@ function plot_reactor_feasible!(plt; ns::Integer=1_000, color=:bluesreds)
     x2 = filter(x -> α[2] * x ≥ d, range(0, 5; length=ns))
     xs = range(-1, 6; length=ns)
 
+    z1 = collect(map(x -> cx[1] * x ^ 2 + cy[2], x1))
+    z2 = collect(map(x -> cx[2] * x ^ 2 + cy[1], x2))
+
     plot!(
         plt,
         x1, zeros(length(x1));
-        zcolor = (x1, x2) -> cx[1] * x1 + cy[2],
-        label = "", # raw"$y_{2} = 1$",
-        color,
-        linewidth = 2,
+        linez     = z1,
+        color     = color,
+        label     = nothing, # raw"$y_{2} = 1$",
+        linewidth = 5,
+        z_order   = :back,
         colorbar_entry = false,
     )
 
     plot!(
         plt,
         zeros(length(x2)), x2;
-        zcolor = (x1, x2) -> cx[2] * x2 + cy[1],
-        label = nothing, # raw"$y_{1} = 1$",
-        color,
-        linewidth = 2,
+        linez     = z2,
+        color     = color,
+        label     = nothing, # raw"$y_{1} = 1$",
+        linewidth = 5,
+        z_order   = :back,
         colorbar_entry = false,
     )
 
@@ -103,10 +109,10 @@ function plot_reactor_optimal(x⃰; ns::Integer = 1_000, color=:bluesreds)
         plt,
         [x⃰[1]],
         [x⃰[2]];
-        color  = :white,
-        marker = :star8,
-        markersize = 8,
-        label  = "Optimal Solution",
+        color      = :white,
+        marker     = :star8,
+        markersize = 10,
+        label      = "Optimal Solution",
     )
 
     return plt
@@ -154,9 +160,9 @@ function plot_reactor_bigm_relaxation!(plt, M::Number = 5.0; ns::Integer=1_000)
 
     heatmap!(
         plt, x1, x2, shading;
-        color=:red,
-        alpha=0.2,
-        colorbar_entry=false,
+        color          = :red,
+        alpha          = 0.2,
+        colorbar_entry = false,
     )
 
     return plt
@@ -164,18 +170,18 @@ end
 
 function plot_reactor_hull(nr::Integer)
     return plot(;
-        size=(1000, 900),
-        plot_title="Hull Feasible Region, samples = $(nr)",
-        title=raw"$ \min~z = \mathbf{c_{x}}'\mathbf{x} + \mathbf{c_{y}}'\mathbf{y} $",
-        xlabel=raw"$x_1$",
-        ylabel=raw"$x_2$",
-        xlims=(-1, 6),
-        ylims=(-1, 6),
-        # clims=( 0, 6),
-        aspect_ratio=:equal,
-        legend = :outertop,
-        legend_columns=2,
-        colorbar_title=raw"$z$",
+        size           = (1000, 900),
+        plot_title     = "Hull Feasible Region, samples = $(nr)",
+        title          = raw"$ \min~z = \mathbf{c_{x}}'\mathbf{x} + \mathbf{c_{y}}'\mathbf{y} $",
+        xlabel         = raw"$x_1$",
+        ylabel         = raw"$x_2$",
+        xlims          = ( -1,  6),
+        ylims          = ( -1,  6),
+        clims          = ( 20, 45),
+        aspect_ratio   = :equal,
+        legend         = :outertop,
+        legend_columns = 2,
+        colorbar_title = raw"$z$",
     )
 end
 
@@ -187,10 +193,10 @@ function plot_reactor_hull!(plt, x⃰, x; ns::Integer=1_000, color=:bluesreds)
 
     heatmap!(
         plt, x1, x2, shading;
-        color = :red,
-        alpha = 0.2,
+        color          = :red,
+        alpha          = 0.2,
+        z_order        = :back,
         colorbar_entry = false,
-        z_order = :back,
     )
 
     return plot_reactor_feasible!(plt; ns, color)
@@ -223,12 +229,12 @@ function plot_reactor_hull(model::JuMP.Model, x⃰; nr::Integer=result_count(mod
 
     scatter!(
         plt,
-        [x1[1]],
-        [x[2]];
-        color=:violet,
-        marker=:rect,
-        markersize=20 * s[end],
-        label="Best Sample",
+        [x1[end]],
+        [x2[end]];
+        color      = :violet,
+        marker     = :rect,
+        markersize = 10,
+        label      = "Best Sample",
     )
 
     scatter!(
@@ -253,7 +259,7 @@ function plot_reactor_indicator(nr::Integer)
         ylabel=raw"$x_2$",
         xlims=(-1, 6),
         ylims=(-1, 6),
-        # clims=(0, 6),
+        clims=( 25, 6),
         aspect_ratio=:equal,
         legend = :outertop,
         legend_columns=2,
@@ -270,7 +276,6 @@ function plot_reactor_indicator(model::JuMP.Model, x⃰; nr::Integer=result_coun
     r = reverse!([reads(model; result=i) for i = 1:nr])
     R = maximum(r)
     s = r ./ R
-    x = [x1[end], x2[end]]
 
     plot_reactor_feasible!(plt; ns)
 
@@ -279,11 +284,11 @@ function plot_reactor_indicator(model::JuMP.Model, x⃰; nr::Integer=result_coun
         x1,
         x2;
         color,
-        zcolor=z,
-        marker=:circle,
-        markersize=20s,
-        label="Samples",
-        z_order=:front,
+        zcolor            = z,
+        marker            = :circle,
+        markersize        = 20s,
+        label             = "Samples",
+        z_order           = :front,
         markerstrokewidth = 0,
     )
 
@@ -291,11 +296,11 @@ function plot_reactor_indicator(model::JuMP.Model, x⃰; nr::Integer=result_coun
         plt,
         [x1[end]],
         [x2[end]];
-        color=:violet,
-        marker=:rect,
-        markersize=20 * s[end],
-        label="Best Sample",
-        z_order=:front,
+        color      = :violet,
+        marker     = :rect,
+        markersize = 10,
+        label      = "Best Sample",
+        z_order    = :front,
     )
 
     scatter!(

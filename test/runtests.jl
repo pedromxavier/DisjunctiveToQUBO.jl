@@ -27,63 +27,6 @@ function MOI.supports_constraint(
     return true
 end
 
-function ToQUBO.Compiler.constraint(model::ToQUBO.Virtual.Model{T}, x::MOI.VectorOfVariables, ::MOI.SOS1{T}, ::QUBOTools.AbstractArchitecture) where {T}
-    # Special Ordered Set of Type 1: ∑ x ≤ min x
-    g = PBO.PBF{VI,T}()
-
-    for xi in x.variables
-        vi = model.source[xi]
-
-        if ToQUBO.Virtual.encoding(vi) isa ToQUBO.Encoding.Mirror
-            for (ωi, _) in ToQUBO.Virtual.expansion(vi)
-                g[ωi] = one(T)
-            end
-        elseif ToQUBO.Virtual.encoding(vi) isa ToQUBO.Encoding.SetVariableEncodingMethod
-            flag = false
-            
-            ξ = ToQUBO.Virtual.expansion(vi)
-            a = ξ[nothing]
-
-            for (ωi, ci) in ξ
-                isempty(ωi) && continue
-
-                γi = ci + a
-
-                if iszero(γi)
-                    flag = true
-
-                    # 1 - y_i
-                    g[ωi] = -one(T)
-
-                    g[nothing] += one(T)
-                end
-            end
-
-            if !flag
-                error("Variable '$vi' is always non-zero")
-            end
-        elseif ToQUBO.Virtual.encoding(vi) isa ToQUBO.Encoding.IntervalVariableEncodingMethod
-            # Indicator variable
-            u = ToQUBO.Encoding.encode!(model, nothing, ToQUBO.Encoding.Mirror{T}())
-
-            error("Currently, ToQUBO only supports SOS1 on binary variables or arbitrary-set-encoded")
-        end
-    end
-
-    # Slack variable
-    z = ToQUBO.Encoding.encode!(model, nothing, ToQUBO.Encoding.Mirror{T}())
-
-    for (ω, c) in ToQUBO.Virtual.expansion(z)
-        g[ω] += c
-    end
-
-    g[nothing] += -one(T)
-
-    return g^2
-end
-
-
-
 function coef_range(m)
     l = last.(QUBOTools.linear_terms(m))
     q = last.(QUBOTools.quadratic_terms(m))
