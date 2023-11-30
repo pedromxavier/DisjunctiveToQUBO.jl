@@ -8,6 +8,8 @@ using LinearAlgebra
 using PythonCall
 using Plots
 
+const diamond = raw"$\diamond$"
+
 # export NumberOfReads, reads, compilation_summary, sampling_summary, squares
 struct DisjunctEncoding{T} <: ToQUBO.Encoding.VariableEncodingMethod end
 

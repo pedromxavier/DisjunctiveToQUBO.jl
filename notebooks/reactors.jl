@@ -5,8 +5,6 @@ using Plots
 using LinearAlgebra
 using DisjunctiveProgramming
 
-const diamond = raw"$\diamond$"
-
 includet("paper.jl")
 
 # Set parameters

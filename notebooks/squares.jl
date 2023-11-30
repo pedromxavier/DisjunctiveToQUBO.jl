@@ -4,26 +4,6 @@ using JuMP
 using Plots
 using DisjunctiveProgramming
 
-# function solve_ind_squares(config!::Function, optimizer=HiGHS.Optimizer; method=Indicator())
-#     model = Model(optimizer)
-
-#     @variable(model, -2 <= x[1:2] <= 2)
-#     @variable(model, y[1:2], Bin)
-
-#     @objective(model, Min, x[1] - x[2] + y[1] + 5y[2])
-
-#     @constraint(model, sum(y) == 1)
-
-#     @constraint(model, sq1[i=1:2], y[1] => {-2 ≤ x[i] ≤ -1})
-#     @constraint(model, sq2[i=1:2], y[2] => {1 ≤ x[i] ≤ 2})
-
-#     config!(model)
-
-#     optimize!(model)
-
-#     return model
-# end
-
 function solve_gdp_squares(config!::Function, optimizer=HiGHS.Optimizer; method=Indicator())
     model = GDPModel(optimizer)
 
@@ -47,27 +27,27 @@ end
 
 solve_gdp_squares(optimizer=HiGHS.Optimizer; method=Indicator()) = solve_gdp_squares(identity, optimizer; method)
 
-function plot_square()
-    return plot(;
-        size           = (700, 600),
+function plot_square_base()
+    plt = plot_base()
+
+    return plot!(
+        plt;
         title          = raw"$ \min~z = x_{1} - x_{2} + y_{1} + 5y_{2} $",
-        xlabel         = raw"$x_1$",
-        ylabel         = raw"$x_2$",
         colorbar_title = raw"$z$",
         xlims          = (-3, 3),
         ylims          = (-3, 3),
         clims          = ( 0, 6),
-        aspect_ratio   = :equal,
+        legend_columns = -1,
     )
 end
 
-function plot_square_feasible(; ns::Integer=1_000, color=:balance)
-    plt = plot_square()
+function plot_square_feasible(; ns::Integer=1_000, color=:bluesreds)
+    plt = plot_square_base()
 
     return plot_square_feasible!(plt; ns, color)
 end
 
-function plot_square_feasible!(plt; ns::Integer=1_000, color=:balance)
+function plot_square_feasible!(plt; ns::Integer=1_000, color=:bluesreds)
     plot!(plt; plot_title="Feasible Region")
 
     x1 = x2 = range(-2, 2; length=ns)
@@ -105,27 +85,31 @@ function plot_square_bigm(
     M::Number;
     nr::Integer=result_count(model),
     ns::Integer=1_000,
-    color=:balance,
+    color=:bluesreds,
+    plot_title="",
+    feasible::Function=<(0),
 ) where {T}
     x = reverse!([value.(model[:x]; result=i) for i = 1:nr])
     z = reverse!([objective_value(model; result=i) for i = 1:nr])
     r = reverse!([reads(model; result=i) for i = 1:nr])
 
-    return plot_square_bigm(x, z, r, x⃰, M; nr, ns, color)
+    plt = plot_square_bigm(x, z, r, x⃰, M; ns, color, feasible)
+
+    plot!(plt; plot_title)
+
+    return plt
 end
 
-function plot_square_bigm(x::Vector{Vector{T}}, z::Vector{T}, r::Vector{Int}, x⃰::Vector{T}, M::Number; nr::Integer = length(x), ns::Integer=1_000, color=:balance) where {T}
+function plot_square_bigm(x::Vector{Vector{T}}, z::Vector{T}, r::Vector{Int}, x⃰::Vector{T}, M::Number; ns::Integer=1_000, color=:bluesreds, feasible::Function=<(0)) where {T}
     plt = plot_square_feasible(; ns, color)
 
-    return plot_square_bigm!(plt, x, z, r, x⃰, M; nr)
+    return plot_square_bigm!(plt, x, z, r, x⃰, M; feasible)
 end
 
-function plot_square_bigm!(plt, x::Vector{Vector{T}}, z::Vector{T}, r::Vector{Int}, x⃰::Vector{T}, M::Number; nr::Integer=length(x)) where {T}
-    plot!(plt; plot_title="Big-\$M\$ Feasible Region, \$M = $(M)\$, samples = $(nr)")
-
+function plot_square_bigm!(plt, x::Vector{Vector{T}}, z::Vector{T}, r::Vector{Int}, x⃰::Vector{T}, M::Number; feasible::Function=<(0)) where {T}
     plot_square_bigm_relaxation!(plt, M)
 
-    return plot_solutions!(plt, x, z, r, x⃰; nr)
+    return plot_solutions!(plt, x, z, r, x⃰; feasible)
 end
 
 function plot_square_bigm_relaxation!(plt, M::Number; ns::Integer=1_000)
@@ -148,23 +132,20 @@ function plot_square_bigm_relaxation!(plt, M::Number; ns::Integer=1_000)
     return plt
 end
 
-function plot_square_hull(nr::Integer)
-    return plot(;
-        size         = (700, 600),
-        plot_title   = "Hull Feasible Region, samples = $(nr)",
+function plot_square_hull_base()
+    plt = plot_base()
+
+    return plot!(
+        plt;
         title        = raw"$ \min~z = x_{1} - x_{2} + y_{1} + 5y_{2} $",
-        xlabel       = raw"$x_1$",
-        ylabel       = raw"$x_2$",
+        colorbar_title = raw"$z$",
         xlims        = (-3, 3),
         ylims        = (-3, 3),
         clims        = ( 0, 6),
-        aspect_ratio = :equal,
-        legend_columns = 2,
-        colorbar_title = raw"$z$",
     )
 end
 
-function plot_square_hull!(plt, x⃰, x; ns::Integer = 1_000)
+function plot_square_hull!(plt; ns::Integer = 1_000, color=:bluesreds)
     x1 = x2 = range(-3, 3; length = ns)
     
     # y1 = 1
@@ -184,90 +165,54 @@ function plot_square_hull!(plt, x⃰, x; ns::Integer = 1_000)
         plt, x1, x2, shading;
         color = :red,
         alpha = 0.2,
-        xlims = extrema(x1),
-        ylims = extrema(x2),
         colorbar_entry = false,
     )
 
     heatmap!(
         plt, x1, x2, coloring1;
-        xlims = extrema(x1),
-        ylims = extrema(x2),
-        z_order = :back,
+        color = color,
     )
 
     heatmap!(
         plt, x1, x2, coloring2;
-        xlims = extrema(x1),
-        ylims = extrema(x2),
-        z_order = :back,
+        color = color,
     )
 
-    scatter!(
-        plt,
-        [x[1]],
-        [x[2]];
-        color  = :white,
-        marker = :circle,
-        markersize = 8,
-        label  = "Best Sample",
-    )
-
-    scatter!(
-        plt,
-        [x⃰[1]],
-        [x⃰[2]];
-        color  = :white,
-        marker = :star8,
-        markersize = 8,
-        label  = "Optimal Solution",
-    )
-
-    plt
+    return plt
 end
 
-function plot_square_hull(model::JuMP.Model, x⃰; nr::Integer=result_count(model), ns::Integer = 1_000)
-    plt = plot_square_hull(nr)
+function plot_square_hull(model::JuMP.Model, x⃰; nr::Integer=result_count(model), ns::Integer = 1_000, plot_title="", feasible::Function=<(0), color=:bluesreds)
+    plt = plot_square_hull_base()
 
     x1 = reverse!([value(model[:x][1]; result=i) for i = 1:nr])
     x2 = reverse!([value(model[:x][2]; result=i) for i = 1:nr])
     z  = reverse!([objective_value(model; result=i) for i = 1:nr])
     r  = reverse!([reads(model; result=i) for i = 1:nr])
-    x  = [x1[end], x2[end]]
+    x  = collect.(zip(x1, x2))
 
-    scatter!(
-        plt,
-        x1,
-        x2;
-        zcolor     = z,
-        marker     = :circle,
-        markersize = 4r,
-        label      = "Samples",
-        z_order    = :front,
-    )
+    plot_square_hull!(plt; ns, color)
 
-    plot_square_hull!(plt, x⃰, x; ns)
+    plot_solutions!(plt, x, z, r, x⃰; feasible)
 
-    plt
+    plot!(plt; plot_title)
+
+    return plt
 end
 
-function plot_square_indicator(nr::Integer)
-    return plot(;
-        size         = (700, 600),
-        plot_title   = "Indicator Feasible Region, samples = $(nr)",
-        title        = raw"$ \min~z = x_{1} - x_{2} + y_{1} + 5y_{2} $",
-        xlabel       = raw"$x_1$",
-        ylabel       = raw"$x_2$",
-        xlims        = (-3, 3),
-        ylims        = (-3, 3),
-        clims        = ( 0, 6),
-        aspect_ratio = :equal,
-        legend_columns = 2,
+function plot_square_indicator_base()
+    plt = plot_base()
+
+    return plot!(
+        plt;
+        title          = raw"$ \min~z = x_{1} - x_{2} + y_{1} + 5y_{2} $",
         colorbar_title = raw"$z$",
+        xlims          = (-3, 3),
+        ylims          = (-3, 3),
+        clims          = ( 0, 6),
     )
 end
 
-function plot_square_indicator!(plt, x⃰, x; ns::Integer = 1_000)
+function plot_square_indicator!(plt; ns::Integer = 1_000, color=:bluesreds)
     x1 = x2 = range(-3, 3; length = ns)
     
     # y1 = 1
@@ -283,73 +228,103 @@ function plot_square_indicator!(plt, x⃰, x; ns::Integer = 1_000)
     envelope(x1, x2) = (-1 ≤ x1 - x2 ≤ 1) && (-2 ≤ x1 ≤ 2) && (-2 ≤ x2 ≤ 2) 
     shading(x1, x2)  = ifelse(envelope(x1, x2), 1.0, NaN)
 
-    # heatmap!(
-    #     plt, x1, x2, shading;
-    #     color = :red,
-    #     alpha = 0.2,
-    #     xlims = extrema(x1),
-    #     ylims = extrema(x2),
-    #     colorbar_entry = false,
-    # )
-
     heatmap!(
         plt, x1, x2, coloring1;
-        xlims = extrema(x1),
-        ylims = extrema(x2),
-        z_order = :back,
+        color = color,
     )
 
     heatmap!(
         plt, x1, x2, coloring2;
-        xlims = extrema(x1),
-        ylims = extrema(x2),
-        z_order = :back,
+        color = color,
     )
 
-    scatter!(
-        plt,
-        [x[1]],
-        [x[2]];
-        color  = :white,
-        marker = :circle,
-        markersize = 8,
-        label  = "Best Sample",
-    )
-
-    scatter!(
-        plt,
-        [x⃰[1]],
-        [x⃰[2]];
-        color  = :white,
-        marker = :star8,
-        markersize = 8,
-        label  = "Optimal Solution",
-    )
-
-    plt
+    return plt
 end
 
-function plot_square_indicator(model::JuMP.Model, x⃰; nr::Integer=result_count(model), ns::Integer = 1_000)
-    plt = plot_square_indicator(nr)
+function plot_square_indicator(model::JuMP.Model, x⃰; nr::Integer=result_count(model), ns::Integer = 1_000, plot_title="", feasible::Function=<(0), color=:bluesreds)
+    plt = plot_square_indicator_base()
 
     x1 = reverse!([value(model[:x][1]; result=i) for i = 1:nr])
     x2 = reverse!([value(model[:x][2]; result=i) for i = 1:nr])
     z  = reverse!([objective_value(model; result=i) for i = 1:nr])
     r  = reverse!([reads(model; result=i) for i = 1:nr])
-    x  = [x1[end], x2[end]]
+    x  = collect.(zip(x1, x2))
 
-    scatter!(
-        plt,
-        x1,
-        x2;
-        zcolor     = z,
-        marker     = :circle,
-        markersize = 4r,
-        label      = "Samples",
-        z_order    = :front,
-    )
+    plot_square_indicator!(plt; ns, color)
 
-    plot_square_indicator!(plt, x⃰, x; ns)
+    plot_solutions!(plt, x, z, r, x⃰; feasible)
 
-    plt
+    plot!(plt; plot_title)
+
+    return plt
+end
+
+function solve_indint_squares(optimizer = DWave.Neal.Optimizer)
+    return solve_indint_squares(identity, optimizer)
+end
+
+function solve_indint_squares(config!, optimizer = DWave.Neal.Optimizer)
+    model = Model(() -> ToQUBO.Optimizer(optimizer))
+
+    @variable(model, y[1:2], Bin)
+    @variable(model, x[1:2])
+
+    @objective(model, Min, x[1] - x[2] + y[1] + 5y[2])
+    @constraint(model, exactly1, sum(y) == 1)
+
+    let virtual_model = unsafe_backend(model)
+        virtual_model.compiler_settings[:setup_callback] = (m::ToQUBO.Optimizer) -> begin
+            n = 8  # number of bits
+            e = ToQUBO.Encoding.Unary()
+            S = [(-2.0, -1.0), (1.0, 2.0)]  # intervals
+            W = Vector{ToQUBO.VI}(undef, 2) # Disjunction Variables
+
+            for j = 1:2 # y indices
+                W[j] = only(ToQUBO.Encoding.encode!(m, y[j].index, ToQUBO.Encoding.Mirror()).y)
+            end
+
+            for i = 1:2 # variables
+                Z = ToQUBO.VI[]
+                Ξ = ToQUBO.PBO.PBF{ToQUBO.VI,Float64}()
+                Χ = nothing
+
+                xi = x[i].index
+                
+                for j = 1:2 # disjuncts
+                    # Manual encoding
+                    z, ξ, χ = ToQUBO.Encoding.encode(e, S[j], n) do (nv::Union{Integer,Nothing} = nothing)
+                        if isnothing(nv)
+                            return MOI.add_variable(m.target_model)
+                        else
+                            return MOI.add_variables(m.target_model, nv)
+                        end
+                    end
+                    
+                    append!(Z, z)
+
+                    Ξ += ToQUBO.PBO.PBF{ToQUBO.VI,Float64}(W[j]) * ξ
+
+                    Χ = isnothing(χ) ? Χ : (isnothing(Χ) ? χ : (Χ += χ))
+                end
+
+                v = ToQUBO.Virtual.Variable{Float64}(
+                    DisjunctEncoding(), # new encoding method
+                    xi,
+                    Z,
+                    Ξ,
+                    Χ,
+                )
+
+                ToQUBO.Encoding.encode!(m, v)
+            end
+
+            MOI.set(m, ToQUBO.Attributes.Quadratize(), true)
+        end
+    end
+
+    config!(model)
+
+    optimize!(model)
+
+    return model
 end
