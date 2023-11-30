@@ -2,40 +2,40 @@
 
 ⋄ Solver: D-Wave Neal Simulated Annealing Sampler
 
-⋄ Number of variables: 50
+⋄ Number of variables: 42
   Encoding ………………… 18
-  Slack ………………………… 32
+  Slack ………………………… 24
   Quadratization … 0
 
 ⋄ Number of qubits: nothing
 
 ⋄ Density
   Linear ……………………… 1.0
-  Quadratic ……………… 0.32081632653061226
+  Quadratic ……………… 0.34494773519163763
 
 ⋄ Coefficient Range
-  Lower Bound ………… -2894.0
-  Upper Bound ………… 1260.0
+  Lower Bound ………… -2750.0
+  Upper Bound ………… 1368.0
 
-⋄ Constant Offset: 8895.0
+⋄ Constant Offset: 8451.0
 
 ⋄ Work counters
-  Compilation Time (sec) : 4.939615681
+  Compilation Time (sec) : 0.014973111
 
 
 ⋄ Sampling Summary
 
-⋄ Number of samples: 999
+⋄ Number of samples: 991
 
 ⋄ Best energy: 0.0
 
-⋄ Time-to-target (sec): 17650.295786202874
+⋄ Time-to-target (sec): 1049.2862087107155
 
 
 * Solver : Virtual QUBO Model
 
 * Status
-  Result count       : 999
+  Result count       : 991
   Termination status : LOCALLY_SOLVED
   Message from the solver:
   ""
@@ -46,5 +46,5 @@
   Objective value    : 0.00000e+00
 
 * Work counters
-  Solve time (sec)   : 3.83463e+00
+  Solve time (sec)   : 1.60056e+00
 

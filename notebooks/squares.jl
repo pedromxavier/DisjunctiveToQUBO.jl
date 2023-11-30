@@ -274,8 +274,6 @@ function solve_indint_squares(config!, optimizer = DWave.Neal.Optimizer)
 
     let virtual_model = unsafe_backend(model)
         virtual_model.compiler_settings[:setup_callback] = (m::ToQUBO.Optimizer) -> begin
-            n = 8  # number of bits
-            e = ToQUBO.Encoding.Unary()
             S = [(-2.0, -1.0), (1.0, 2.0)]  # intervals
             W = Vector{ToQUBO.VI}(undef, 2) # Disjunction Variables
 
@@ -289,10 +287,12 @@ function solve_indint_squares(config!, optimizer = DWave.Neal.Optimizer)
                 Χ = nothing
 
                 xi = x[i].index
+                ni = MOI.get(m, ToQUBO.Attributes.VariableEncodingBits(), xi)
+                ei = MOI.get(m, ToQUBO.Attributes.VariableEncodingMethod(), xi)
                 
                 for j = 1:2 # disjuncts
                     # Manual encoding
-                    z, ξ, χ = ToQUBO.Encoding.encode(e, S[j], n) do (nv::Union{Integer,Nothing} = nothing)
+                    z, ξ, χ = ToQUBO.Encoding.encode(ei, S[j], ni) do (nv::Union{Integer,Nothing} = nothing)
                         if isnothing(nv)
                             return MOI.add_variable(m.target_model)
                         else
