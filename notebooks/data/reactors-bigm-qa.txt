@@ -1,0 +1,50 @@
+⋄ Compilation Summary
+
+⋄ Solver: D-Wave Quantum Annealing Sampler
+
+⋄ Number of variables: 34
+  Encoding ………………… 18
+  Slack ………………………… 16
+  Quadratization … 0
+
+⋄ Number of qubits: 120
+
+⋄ Density
+  Linear ……………………… 1.0
+  Quadratic ……………… 0.6720142602495544
+
+⋄ Coefficient Range
+  Lower Bound ………… -213740.109375
+  Upper Bound ………… 1.236992e6
+
+⋄ Constant Offset: 705547.5
+
+⋄ Work counters
+  Compilation Time (sec) : 1.298987619
+
+
+⋄ Sampling Summary
+
+⋄ Number of samples: 998
+
+⋄ Best energy: 184.7890625
+
+⋄ Time-to-target (sec): -Inf
+
+
+* Solver : Virtual QUBO Model
+
+* Status
+  Result count       : 998
+  Termination status : LOCALLY_SOLVED
+  Message from the solver:
+  ""
+
+* Candidate solution (result #1)
+  Primal status      : FEASIBLE_POINT
+  Dual status        : NO_SOLUTION
+  Objective value    : 1.84789e+02
+
+* Work counters
+  Solve time (sec)   : 1.64149e+00
+
