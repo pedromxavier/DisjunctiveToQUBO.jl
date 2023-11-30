@@ -5,7 +5,7 @@ function plot_base()
         ylabel         = raw"$x_2$",
         aspect_ratio   = :equal,
         legend         = :outerbottom,
-        legend_columns = 4,
+        legend_columns = -1,
     )
 end
 
@@ -14,11 +14,11 @@ function plot_infeasible_solutions!(plt, x::Vector{Vector{T}}, s::Vector{T}; inf
         plt,
         [x[i][1] for i = 1:length(x)],
         [x[i][2] for i = 1:length(x)];
-        color             = infcolor,
+        color             = :darkmagenta,
         markershape       = :diamond,
         markersize        = 20s,
         markerstrokewidth = 0.5,
-        label             = "Infeasible Sample",
+        label             = "Infeasible",
     )
 
     return plt
@@ -34,7 +34,7 @@ function plot_feasible_solutions!(plt, x::Vector{Vector{T}}, z::Vector{T}, s::Ve
         marker            = :circle,
         markersize        = 20s,
         markerstrokewidth = 0.25,
-        label             = "Feasible Sample",
+        label             = "Feasible",
     )
 
     return plt
@@ -49,7 +49,7 @@ function plot_optimal_solution!(plt, x⃰)
         marker            = :star8,
         markersize        = 10,
         markerstrokewidth = 0.5,
-        label             = "Optimal Solution",
+        label             = "Optimal",
     )
 
     return plt
@@ -60,11 +60,11 @@ function plot_best_sample!(plt, x::Vector{Vector{T}}) where {T}
         plt,
         [x[end][1]],
         [x[end][2]];
-        color             = :cyan,
+        color             = :darkcyan,
         marker            = :rect,
         markersize        = 10,
         markerstrokewidth = 0.5,
-        label             = "Best Sample",
+        label             = "Best Found",
     )
 
     return plt

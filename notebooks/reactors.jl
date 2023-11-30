@@ -61,7 +61,7 @@ function plot_reactor_feasible(; ns::Integer=1_000, color=:bluesreds)
 
     plot_reactor_feasible!(plt; ns, color)
 
-    plot!(plt; legend_columns = 1)
+    plot!(plt; legend_columns = -1)
 
     return plt
 end
@@ -132,7 +132,7 @@ function plot_reactor_optimal(x⃰; ns::Integer = 1_000, color=:bluesreds)
 
     plot_optimal_solution!(plt, x⃰)
 
-    plot!(plt; plot_title="Feasible Region $(diamond) Optimal Solution", legend_columns = 2)
+    plot!(plt; plot_title="Feasible Region $(diamond) Optimal Solution", legend_columns = -1)
 
     return plt
 end
@@ -165,7 +165,7 @@ function plot_reactor_bigm!(plt, x::Vector{Vector{T}}, z::Vector{T}, r::Vector{I
     
     plot_solutions!(plt, x, z, r, x⃰; feasible)
     
-    plot!(plt; plot_title, legend_columns = 3)
+    plot!(plt; plot_title, legend_columns = -1)
 
     return plt
 end
@@ -229,7 +229,7 @@ function plot_reactor_hull(model::JuMP.Model, x⃰::Vector; nr::Integer=result_c
 
     plot_solutions!(plt, x, z, r, x⃰; color, feasible)
 
-    plot!(plt; plot_title, legend_columns = 3)
+    plot!(plt; plot_title, legend_columns = -1)
 
     return plt
 end
@@ -255,7 +255,7 @@ function plot_reactor_indicator(model::JuMP.Model, x⃰; nr::Integer=result_coun
 
     plot_solutions!(plt, x, z, r, x⃰; color, feasible)
 
-    plot!(plt; plot_title, legend_columns = 3)
+    plot!(plt; plot_title, legend_columns = -1)
 
     return plt
 end
@@ -407,7 +407,7 @@ function solve_indintcons_reactors(config!::Function, optimizer = DWave.Neal.Opt
 
                 ToQUBO.Encoding.encode!(m, v2)
             end
-            
+
             MOI.set(m, ToQUBO.Attributes.Quadratize(), true)
         end
     end
