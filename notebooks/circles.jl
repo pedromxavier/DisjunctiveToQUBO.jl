@@ -28,22 +28,21 @@ end
 
 solve_gdp_circles(optimizer=HiGHS.Optimizer; method=Indicator()) = solve_gdp_circles(identity, optimizer; method)
 
-function plot_circle()
-    return plot(;
-        size           = (700, 600),
+function plot_circle_base()
+    plt = plot_base()
+
+    return plot!(
+        plt;
         title          = raw"$ \min~z = x_{1} - x_{2} + y_{1} + 5y_{2} $",
-        xlabel         = raw"$x_1$",
-        ylabel         = raw"$x_2$",
         colorbar_title = raw"$z$",
         xlims          = (-3, 3),
         ylims          = (-3, 3),
         clims          = ( 0, 6),
-        aspect_ratio   = :equal,
     )
 end
 
 function plot_circle_feasible(; ns::Integer=1_000, color=:balance)
-    plt = plot_circle()
+    plt = plot_circle_base()
 
     return plot_circle_feasible!(plt; ns, color)
 end

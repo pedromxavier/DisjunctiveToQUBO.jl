@@ -20,14 +20,14 @@
 ⋄ Constant Offset: 65943.0
 
 ⋄ Work counters
-  Compilation Time (sec) : 0.055112962
+  Compilation Time (sec) : 0.318375754
 
 
 ⋄ Sampling Summary
 
 ⋄ Number of samples: 1000
 
-⋄ Best energy: 132.10204081630218
+⋄ Best energy: 132.10204081625852
 
 ⋄ Time-to-target (sec): -Inf
 
@@ -46,5 +46,5 @@
   Objective value    : 1.32102e+02
 
 * Work counters
-  Solve time (sec)   : 8.58756e-01
+  Solve time (sec)   : 1.30677e+00
 
