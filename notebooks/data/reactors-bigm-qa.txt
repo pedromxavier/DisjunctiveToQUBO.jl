@@ -7,7 +7,7 @@
   Slack ………………………… 9
   Quadratization … 0
 
-⋄ Number of qubits: 76
+⋄ Number of qubits: 78
 
 ⋄ Density
   Linear ……………………… 1.0
@@ -20,22 +20,24 @@
 ⋄ Constant Offset: 925126.5
 
 ⋄ Work counters
-  Compilation Time (sec) : 2.169505601
+  Compilation Time (sec) : 1.410310894
 
 
 ⋄ Sampling Summary
 
-⋄ Number of samples: 754
+⋄ Number of samples: 936
 
-⋄ Best energy: 318.0250000000233
+⋄ Best energy: 910.0791015625
 
-⋄ Time-to-target (sec): -Inf
+⋄ Time-to-target (sec): Inf
 
+⋄ Time-to-feasible (sec): Inf
 
+45.0
 * Solver : Virtual QUBO Model
 
 * Status
-  Result count       : 754
+  Result count       : 936
   Termination status : LOCALLY_SOLVED
   Message from the solver:
   ""
@@ -43,8 +45,8 @@
 * Candidate solution (result #1)
   Primal status      : FEASIBLE_POINT
   Dual status        : NO_SOLUTION
-  Objective value    : 3.18025e+02
+  Objective value    : 9.10079e+02
 
 * Work counters
-  Solve time (sec)   : 1.11995e+00
+  Solve time (sec)   : 7.71700e-01
 

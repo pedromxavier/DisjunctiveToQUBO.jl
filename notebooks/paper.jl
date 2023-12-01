@@ -157,6 +157,7 @@ struct SamplingSummary
     ns::Int
     λ0::Float64
     ts::Float64
+    tf::Float64
 end
 
 function Base.show(io::IO, ss::SamplingSummary)
@@ -170,11 +171,13 @@ function Base.show(io::IO, ss::SamplingSummary)
         ⋄ Best energy: $(ss.λ0)
 
         ⋄ Time-to-target (sec): $(ss.ts)
+
+        ⋄ Time-to-feasible (sec): $(ss.tf)
         """
     )
 end
 
-function sampling_summary(model, λ)
+function sampling_summary(model, λ, μ = 0.0)
     # Retrieve Virtual Model
     vm = unsafe_backend(model)::ToQUBO.Optimizer
 
@@ -187,7 +190,8 @@ function sampling_summary(model, λ)
     ss = QUBOTools.solution(qo)
     ns = length(ss)
 
-    ts = QUBOTools.ttt(ss, λ)
+    ts = QUBOTools.ttt(ss, λ) |> abs
+    tf = QUBOTools.ttt(ss, μ) |> abs
 
     λ0 = if ns > 0
         ss[1].value
@@ -195,7 +199,76 @@ function sampling_summary(model, λ)
         NaN
     end
 
-    return SamplingSummary(ns, λ0, ts)
+    return SamplingSummary(ns, λ0, ts, tf)
+end
+
+function table_summary(data, λ, μ)
+    header = join(
+        [
+            "Reformulation Method",
+            raw"$\log_{10}\Delta$",
+            raw"$n_{\textrm{vars}}$",
+            raw"$\textrm{TTT}_{\textrm{SA}}$",
+            raw"$\textrm{TTF}_{\textrm{SA}}$",
+            raw"$n_{\textrm{qubits}}$",
+            raw"$\textrm{TTT}_{\textrm{QA}}$",
+            raw"$\textrm{TTF}_{\textrm{QA}}$",
+        ],
+        " & ",
+    ) * raw" \\\\"
+
+    rows = []
+
+    for (method, (sa_model, qa_model)) in data
+        cs    = compilation_summary(qa_model)
+        sa_ss = sampling_summary(sa_model, λ, μ)
+        qa_ss = sampling_summary(qa_model, λ, μ)
+
+        Δ = trunc(Int, log10(max(abs(cs.l), abs(cs.u))))
+
+        φ = (x) -> x isa Float64 ? (isinf(x) ? raw"$\infty$" : string(round(x; digits=2))) : string(x)
+
+        push!(
+            rows,
+            [
+                method,
+                φ(Δ),
+                φ(cs.n),
+                φ(sa_ss.ts),
+                φ(sa_ss.tf),
+                φ(cs.qb),
+                φ(qa_ss.ts),
+                φ(qa_ss.tf),
+            ],
+        )
+    end
+
+    l = [maximum([length(rows[j][i]) for j = eachindex(rows)]) for i = 1:8]
+
+    for i = eachindex(rows)
+        for j = eachindex(rows[i])
+            rows[i][j] = rpad(rows[i][j], l[j])
+        end
+
+        rows[i] = "  " * join(rows[i], " & ") * raw" \\\\"
+    end
+
+    table = join(
+        [
+            raw"\hline",
+            header,
+            raw"\hline",
+            rows...,
+            raw"\hline",
+        ],
+        "\n",
+    )
+
+    return """
+    \\begin{tabular}{|l|ccccccc|}
+    $(table)
+    \\end{tabular}
+    """
 end
 
 includet("paper_plots.jl")

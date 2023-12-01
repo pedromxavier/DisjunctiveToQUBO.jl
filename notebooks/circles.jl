@@ -14,8 +14,8 @@ function solve_gdp_circles(config!::Function, optimizer=HiGHS.Optimizer; method=
 
     @objective(model, Min, x[1] - x[2] + y[1] + 5y[2])
 
-    @constraint(model, x[1]^2 + 2 * x[1] + 1 + x[2]^2 + 2 * x[2] + 1 ≤ 1, Disjunct(Y[1]))
-    @constraint(model, x[1]^2 - 2 * x[1] + 1 + x[2]^2 - 2 * x[2] + 1 ≤ 1, Disjunct(Y[2]))
+    @constraint(model, (x[1] + 1)^2 + (x[2] + 1)^2 ≤ 1, Disjunct(Y[1]))
+    @constraint(model, (x[1] - 1)^2 + (x[2] - 1)^2 ≤ 1, Disjunct(Y[2]))
 
     disjunction(model, Y, exactly1=true)
 
@@ -41,13 +41,13 @@ function plot_circle_base()
     )
 end
 
-function plot_circle_feasible(; ns::Integer=1_000, color=:balance)
+function plot_circle_feasible(; ns::Integer=1_000, color=:bluesreds)
     plt = plot_circle_base()
 
     return plot_circle_feasible!(plt; ns, color)
 end
 
-function plot_circle_feasible!(plt; ns::Integer=1_000, color=:balance)
+function plot_circle_feasible!(plt; ns::Integer=1_000, color=:bluesreds)
     plot!(plt; plot_title="Feasible Region")
 
     x1 = x2 = range(-2, 2; length=ns)
@@ -94,36 +94,40 @@ function plot_circle_bigm(
     M::Number;
     nr::Integer=result_count(model),
     ns::Integer=1_000,
-    color=:balance,
+    color=:bluesreds,
+    plot_title="",
+    feasible=<(0),
 ) where {T}
     x = reverse!([value.(model[:x]; result=i) for i = 1:nr])
     z = reverse!([objective_value(model; result=i) for i = 1:nr])
     r = reverse!([reads(model; result=i) for i = 1:nr])
 
-    return plot_circle_bigm(x, z, r, x⃰, M; nr, ns, color)
+    plt = plot_circle_bigm(x, z, r, x⃰, M; ns, color, feasible)
+
+    plot!(plt; plot_title)
+
+    return plt
 end
 
-function plot_circle_bigm(x::Vector{Vector{T}}, z::Vector{T}, r::Vector{Int}, x⃰::Vector{T}, M::Number; nr::Integer = length(x), ns::Integer=1_000, color=:balance) where {T}
-    plt = plot_circle_feasible(; ns, color)
+function plot_circle_bigm(x::Vector{Vector{T}}, z::Vector{T}, r::Vector{Int}, x⃰::Vector{T}, M::Number; ns::Integer=1_000, color=:bluesreds, feasible=<(0)) where {T}
+    plt = plot_circle_base()
 
-    return plot_circle_bigm!(plt, x, z, r, x⃰, M; nr)
+    plot_circle_feasible!(plt; ns, color)
+
+    return plot_circle_bigm!(plt, x, z, r, x⃰, M; feasible)
 end
 
-function plot_circle_bigm!(plt, x::Vector{Vector{T}}, z::Vector{T}, r::Vector{Int}, x⃰::Vector{T}, M::Number; nr::Integer=length(x)) where {T}
-    plot!(plt; plot_title="Big-\$M\$ Feasible Region, \$M = $(M)\$, samples = $(nr)")
-
+function plot_circle_bigm!(plt, x::Vector{Vector{T}}, z::Vector{T}, r::Vector{Int}, x⃰::Vector{T}, M::Number; feasible = <(0)) where {T}
     plot_circle_bigm_relaxation!(plt, M)
 
-    return plot_solutions!(plt, x, z, r, x⃰; nr)
+    return plot_solutions!(plt, x, z, r, x⃰; feasible)
 end
 
 function plot_circle_bigm_relaxation!(plt, M::Number; ns::Integer=1_000)
-    x1 = x2 = range(-2, 2; length=ns)
+    x1 = x2 = range(-5, 5; length=ns)
 
-    envelope(x1, x2, M=M) = (-2 - M <= x1 <= -1 + M) &&
-                            (-2 - M <= x2 <= -1 + M) &&
-                            (1 - M <= x1 <= 2 + M) &&
-                            (1 - M <= x2 <= 2 + M)
+    envelope(x1, x2) = ((x1 + 1)^2 + (x2 + 1)^2 <= 1 + M) ||
+                       ((x1 - 1)^2 + (x2 - 1)^2 <= 1 + M)
 
     shading(x1, x2) = ifelse(envelope(x1, x2), 1.0, NaN)
 
@@ -239,36 +243,21 @@ function plot_circle_hull(model::JuMP.Model, x⃰; nr::Integer=result_count(mode
     plt
 end
 
-function plot_circle_indicator(nr::Integer)
-    return plot(;
-        size         = (700, 600),
-        plot_title   = "Indicator Feasible Region, samples = $(nr)",
-        title        = raw"$ \min~z = x_{1} - x_{2} + y_{1} + 5y_{2} $",
-        xlabel       = raw"$x_1$",
-        ylabel       = raw"$x_2$",
-        xlims        = (-3, 3),
-        ylims        = (-3, 3),
-        clims        = ( 0, 6),
-        aspect_ratio = :equal,
-        legend_columns = 2,
+function plot_circle_indicator_base()
+    plt = plot_base()
+
+    return plot!(
+        plt;
+        title          = raw"$ \min~z = x_{1} - x_{2} + y_{1} + 5y_{2} $",
         colorbar_title = raw"$z$",
+        xlims          = (-3, 3),
+        ylims          = (-3, 3),
+        clims          = ( 0, 6),
     )
 end
 
-function plot_circle_indicator!(plt, x⃰, x; ns::Integer = 1_000, color = :balance)
+function plot_circle_indicator!(plt; ns::Integer = 1_000, color = :bluesreds)
     x1 = x2 = range(-3, 3; length = ns)
-
-    envelope(x1, x2) = (-1 ≤ x1 - x2 ≤ 1) && (-2 ≤ x1 ≤ 2) && (-2 ≤ x2 ≤ 2) 
-    shading(x1, x2)  = ifelse(envelope(x1, x2), 1.0, NaN)
-
-    # heatmap!(
-    #     plt, x1, x2, shading;
-    #     color = :red,
-    #     alpha = 0.2,
-    #     xlims = extrema(x1),
-    #     ylims = extrema(x2),
-    #     colorbar_entry = false,
-    # )
 
     # y1 = 1
     objective1(x1, x2) = x1 - x2 + 1
@@ -294,50 +283,23 @@ function plot_circle_indicator!(plt, x⃰, x; ns::Integer = 1_000, color = :bala
         color=color,
     )
 
-    scatter!(
-        plt,
-        [x[1]],
-        [x[2]];
-        color  = :white,
-        marker = :circle,
-        markersize = 8,
-        label  = "Best Sample",
-    )
-
-    scatter!(
-        plt,
-        [x⃰[1]],
-        [x⃰[2]];
-        color  = :white,
-        marker = :star8,
-        markersize = 8,
-        label  = "Optimal Solution",
-    )
-
     plt
 end
 
-function plot_circle_indicator(model::JuMP.Model, x⃰; nr::Integer=result_count(model), ns::Integer = 1_000)
-    plt = plot_circle_indicator(nr)
+function plot_circle_indicator(model::JuMP.Model, x⃰; nr::Integer=result_count(model), ns::Integer = 1_000, plot_title="", feasible=<(0))
+    plt = plot_circle_indicator_base()
 
     x1 = reverse!([value(model[:x][1]; result=i) for i = 1:nr])
     x2 = reverse!([value(model[:x][2]; result=i) for i = 1:nr])
     z  = reverse!([objective_value(model; result=i) for i = 1:nr])
     r  = reverse!([reads(model; result=i) for i = 1:nr])
-    x  = [x1[end], x2[end]]
+    x  = collect.(zip(x1, x2))
 
-    scatter!(
-        plt,
-        x1,
-        x2;
-        zcolor     = z,
-        marker     = :circle,
-        markersize = 4r,
-        label      = "Samples",
-        z_order    = :front,
-    )
+    plot_circle_indicator!(plt; ns)
 
-    plot_circle_indicator!(plt, x⃰, x; ns)
+    plot_solutions!(plt, x, z, r, x⃰; feasible)
 
-    plt
+    plot!(plt; plot_title)
+
+    return plt
 end

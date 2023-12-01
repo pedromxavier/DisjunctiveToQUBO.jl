@@ -206,7 +206,7 @@ version = "4.1.1"
 
 [[deps.DWave]]
 deps = ["Graphs", "JSON", "MathOptInterface", "PythonCall", "QUBODrivers", "QUBOTools"]
-git-tree-sha1 = "e913265c900bb3c18dc4d7e346d42ecffaab5630"
+git-tree-sha1 = "07aab87c2b11d00dc718a1545cf98d34a985b5f7"
 repo-rev = "master"
 repo-url = "https://github.com/psrenergy/DWave.jl.git"
 uuid = "4d534982-bf11-4157-9e48-fe3a62208a50"

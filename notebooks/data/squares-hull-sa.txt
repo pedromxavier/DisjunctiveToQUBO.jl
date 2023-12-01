@@ -20,18 +20,20 @@
 ⋄ Constant Offset: 65943.0
 
 ⋄ Work counters
-  Compilation Time (sec) : 0.318375754
+  Compilation Time (sec) : 0.209728188
 
 
 ⋄ Sampling Summary
 
 ⋄ Number of samples: 1000
 
-⋄ Best energy: 132.10204081625852
+⋄ Best energy: 20.999999999970896
 
-⋄ Time-to-target (sec): -Inf
+⋄ Time-to-target (sec): Inf
 
+⋄ Time-to-feasible (sec): Inf
 
+7.0
 * Solver : Virtual QUBO Model
 
 * Status
@@ -43,8 +45,8 @@
 * Candidate solution (result #1)
   Primal status      : FEASIBLE_POINT
   Dual status        : NO_SOLUTION
-  Objective value    : 1.32102e+02
+  Objective value    : 2.10000e+01
 
 * Work counters
-  Solve time (sec)   : 1.30677e+00
+  Solve time (sec)   : 9.45460e-01
 
