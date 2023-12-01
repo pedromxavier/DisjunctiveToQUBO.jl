@@ -295,6 +295,12 @@ function plot_circle_indicator(model::JuMP.Model, x⃰; nr::Integer=result_count
     r  = reverse!([reads(model; result=i) for i = 1:nr])
     x  = collect.(zip(x1, x2))
 
+    for i = 1:nr
+        if !(((x1[i] + 1)^2 + (x2[i] + 1)^2 ≤ 1) || ((x1[i] - 1)^2 + (x2[i] - 1)^2 ≤ 1))
+            z[i] = z[1]
+        end
+    end
+
     plot_circle_indicator!(plt; ns)
 
     plot_solutions!(plt, x, z, r, x⃰; feasible)
