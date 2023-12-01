@@ -7,7 +7,7 @@
   Slack ………………………… 0
   Quadratization … 0
 
-⋄ Number of qubits: 38
+⋄ Number of qubits: 37
 
 ⋄ Density
   Linear ……………………… 0.058823529411764705
@@ -20,7 +20,7 @@
 ⋄ Constant Offset: 11.0
 
 ⋄ Work counters
-  Compilation Time (sec) : 0.084613972
+  Compilation Time (sec) : 0.115602834
 
 
 ⋄ Sampling Summary
@@ -48,5 +48,5 @@
   Objective value    : 2.50000e-01
 
 * Work counters
-  Solve time (sec)   : 2.89371e-01
+  Solve time (sec)   : 2.72427e-01
 

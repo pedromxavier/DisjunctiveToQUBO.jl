@@ -20,7 +20,7 @@
 ⋄ Constant Offset: 75.5
 
 ⋄ Work counters
-  Compilation Time (sec) : 0.133695705
+  Compilation Time (sec) : 0.214707778
 
 
 ⋄ Sampling Summary
@@ -29,7 +29,7 @@
 
 ⋄ Best energy: 20.1625
 
-⋄ Time-to-target (sec): 8.157184430533805
+⋄ Time-to-target (sec): 24.730501877034854
 
 ⋄ Time-to-feasible (sec): Inf
 
@@ -48,5 +48,5 @@
   Objective value    : 2.01625e+01
 
 * Work counters
-  Solve time (sec)   : 2.63433e+00
+  Solve time (sec)   : 8.94673e+00
 

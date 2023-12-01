@@ -20,24 +20,24 @@
 ⋄ Constant Offset: 11.0
 
 ⋄ Work counters
-  Compilation Time (sec) : 0.267302894
+  Compilation Time (sec) : 0.371142551
 
 
 ⋄ Sampling Summary
 
-⋄ Number of samples: 997
+⋄ Number of samples: 995
 
 ⋄ Best energy: 0.0
 
-⋄ Time-to-target (sec): 1.5869107007260737
+⋄ Time-to-target (sec): 3.8020424330589555
 
-⋄ Time-to-feasible (sec): 1.5869107007260737
+⋄ Time-to-feasible (sec): 3.8020424330589555
 
 7.0
 * Solver : Virtual QUBO Model
 
 * Status
-  Result count       : 997
+  Result count       : 995
   Termination status : LOCALLY_SOLVED
   Message from the solver:
   ""
@@ -48,5 +48,5 @@
   Objective value    : 0.00000e+00
 
 * Work counters
-  Solve time (sec)   : 9.52670e-01
+  Solve time (sec)   : 2.59781e+00
 

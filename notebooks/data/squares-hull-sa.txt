@@ -20,7 +20,7 @@
 ⋄ Constant Offset: 65943.0
 
 ⋄ Work counters
-  Compilation Time (sec) : 0.209728188
+  Compilation Time (sec) : 0.256141407
 
 
 ⋄ Sampling Summary
@@ -48,5 +48,5 @@
   Objective value    : 2.10000e+01
 
 * Work counters
-  Solve time (sec)   : 9.45460e-01
+  Solve time (sec)   : 2.30286e+00
 

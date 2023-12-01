@@ -7,7 +7,7 @@
   Slack ………………………… 24
   Quadratization … 0
 
-⋄ Number of qubits: 99
+⋄ Number of qubits: 107
 
 ⋄ Density
   Linear ……………………… 1.0
@@ -20,14 +20,14 @@
 ⋄ Constant Offset: 8451.0
 
 ⋄ Work counters
-  Compilation Time (sec) : 1.553879438
+  Compilation Time (sec) : 1.937210429
 
 
 ⋄ Sampling Summary
 
 ⋄ Number of samples: 1000
 
-⋄ Best energy: 70.0
+⋄ Best energy: 15.0
 
 ⋄ Time-to-target (sec): Inf
 
@@ -45,8 +45,8 @@
 * Candidate solution (result #1)
   Primal status      : FEASIBLE_POINT
   Dual status        : NO_SOLUTION
-  Objective value    : 7.00000e+01
+  Objective value    : 1.50000e+01
 
 * Work counters
-  Solve time (sec)   : 7.43432e-01
+  Solve time (sec)   : 9.55287e-01
 

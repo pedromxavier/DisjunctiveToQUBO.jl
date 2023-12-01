@@ -224,19 +224,41 @@ function table_summary(data, λ, μ)
         sa_ss = sampling_summary(sa_model, λ, μ)
         qa_ss = sampling_summary(qa_model, λ, μ)
 
-        Δ = trunc(Int, log10(max(abs(cs.l), abs(cs.u))))
+        Δ = trunc(log10(max(abs(cs.l), abs(cs.u))); digits=2)
 
-        φ = (x) -> x isa Float64 ? (isinf(x) ? raw"$\infty$" : string(round(x; digits=2))) : string(x)
+        θ = (x) -> begin
+            if x isa Float64
+                if isinf(x)
+                    return raw"$\infty$"
+                elseif iszero(x)
+                    return "0"
+                elseif x < 0.1
+                    k = ceil(Int, log10(x))
+
+                    return "\$\\lessapprox 10^{$k}\$"
+                elseif x > 1_000
+                    k = floor(Int, log10(x))
+
+                    return "\$\\gtrapprox 10^{$k}\$"
+                else
+                    return string(round(x; digits = 2))
+                end
+            else
+                return string(x)
+            end
+        end
+
+        φ = (x) -> x isa Float64 ? θ(x) : string(x)
 
         push!(
             rows,
             [
                 method,
-                φ(Δ),
-                φ(cs.n),
+                string(Δ),
+                string(cs.n),
                 φ(sa_ss.ts),
                 φ(sa_ss.tf),
-                φ(cs.qb),
+                string(cs.qb),
                 φ(qa_ss.ts),
                 φ(qa_ss.tf),
             ],
